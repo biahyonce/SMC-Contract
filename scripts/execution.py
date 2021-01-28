@@ -90,9 +90,8 @@ def main():
     # remove
     A = accounts[0]
     B = accounts[1]
-    contract = SMC.deploy({'from': A})
-    returned = contract.commit.call(commit, TruthTable, {'from': A})
-    print(returned)
-    print(A.address)
+    CommitHandler.deploy({'from': A})
+    SMC.deploy({'from': A})
+    contract = SMC[0]
+    contract.commit(commit, TruthTable, {'from': A})
     print(contract.getCommit.call(A.address, {'from': A}))
-    #print(contract.checkCommit.call(A.address, nonce, True, False, TruthTable, {'from': A}))
