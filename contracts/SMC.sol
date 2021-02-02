@@ -15,9 +15,9 @@ contract SMC {
         return commitGenerated;
     }
 
-    function checkCommit(address owner, bytes memory nonce, bytes memory b1, bytes memory b3, bool[3][4] memory truthTable) public returns (bool) {
+    function checkCommit(address owner, bytes memory nonce, bytes memory b1, bytes memory b3) public returns (bool) {
         bytes32 value = commits[owner].commit;
-        return CommitHandler.verify(value, nonce, b1, b3, truthTable);
+        return CommitHandler.verify(value, nonce, b1, b3);
     }
 
     function getCommit(address owner) public returns (CommitHandler.Commit memory){

@@ -95,4 +95,4 @@ def main():
     contract = SMC[0]
     contract.commit(commit, TruthTable, {'from': A})
     print('get commit = {c}'.format(c=contract.getCommit.call(A.address, {'from': A})[2]))
-    print(contract.checkCommit.call(A.address, nonce.encode(), bytes(True), bytes(False), TruthTable))
+    print(contract.checkCommit.call(A.address, nonce.encode(), bytes(True), bytes(False)))
