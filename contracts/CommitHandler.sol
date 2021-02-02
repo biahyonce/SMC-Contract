@@ -24,7 +24,7 @@ library CommitHandler {
         return Commit(owner, previousCommitOwner, commit, truthTable);
     }
 
-    function verify(bytes32 value, bytes32 nonce, bool b1, bool b3, bool[3][4] memory truthTable) public returns(bool) {
+    function verify(bytes32 value, bytes memory nonce, bytes memory b1, bytes memory b3, bool[3][4] memory truthTable) public returns(bool) {
         bytes32 generatedValue = sha256(abi.encodePacked(nonce, b1, b3));
         return value == generatedValue;
     }

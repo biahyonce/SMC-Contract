@@ -63,16 +63,15 @@ def showTruthTable(TT):
     for row in TT: print(row)
 
 def generateCommit(nonce, b1, b3):
-    commit = hashlib.sha256()
-    commit.update(nonce)
+    commit = hashlib.new('sha256', nonce.encode())
     commit.update(bytes(b1))
     commit.update(bytes(b3))
-    return commit.digest()
+    return "0x" + commit.hexdigest()
 
 def generateNonce(randomString):
     nonce = hashlib.sha256()
     nonce.update(randomString)
-    return nonce.digest()
+    return nonce.hexdigest()
 
 def main():
     TruthTable = [  [False,False,False],
@@ -82,10 +81,11 @@ def main():
     ]
 
     # Initial truth table
-    print('>>>INITIAL TRUTH TABLE<<<')
-    showTruthTable(TruthTable)
-    nonce = generateNonce(b'nonceA')
+    nonce = generateNonce(b'nonce')
     commit = generateCommit(nonce, True, False)
+    print(nonce)
+    print()
+    print('commit = {c}'.format(c = commit))
 
     # remove
     A = accounts[0]
@@ -94,4 +94,5 @@ def main():
     SMC.deploy({'from': A})
     contract = SMC[0]
     contract.commit(commit, TruthTable, {'from': A})
-    print(contract.getCommit.call(A.address, {'from': A}))
+    print('get commit = {c}'.format(c=contract.getCommit.call(A.address, {'from': A})[2]))
+    print(contract.checkCommit.call(A.address, nonce.encode(), bytes(True), bytes(False), TruthTable))
