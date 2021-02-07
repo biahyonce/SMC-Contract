@@ -20,11 +20,10 @@ contract SMC {
      */
     function firstCommit(bytes32 commit, bool[3][4] memory truthTable) public returns (CommitHandler.Commit memory){
         address owner = msg.sender;
-        CommitHandler.Commit memory commitGenerated = CommitHandler.generate(owner, commit, truthTable);
+        CommitHandler.Commit memory commitGenerated = CommitHandler.generate(commit, truthTable);
         commits[owner] = commitGenerated;
         return commitGenerated;
     }
-
 
     /**
     @notice Store the next commit of a computation
