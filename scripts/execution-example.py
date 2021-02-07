@@ -73,6 +73,43 @@ def generateNonce(randomString):
     nonce.update(randomString)
     return nonce.hexdigest()
 
+def deployContract(A):
+    CommitHandler.deploy({'from': A})
+    SMC.deploy({'from': A})
+    return SMC[0]
+
+def generate_TTA(contract, A, TruthTable):
+    ## 1.1: Random permutation (A)
+    TT_A = randomPermutation(TruthTable)
+
+    ## 1.2: Inversion of columns 
+    (b1_A, b3_A, TT_A) = inversionOfColumns(TT_A, 0, 2)
+    print('\n\n>>>FINAL TT_A<<<')
+    showTruthTable(TT_A)
+
+    print('\n\n>>>SEND TT_A TO SMART CONTRACT<<<')
+    nonce = generateNonce(b'nonceA')
+    commit = generateCommit(nonce, b1_A, b3_A)
+    contract.firstCommit(commit, TT_A, {'from': A})
+
+def generate_TTB(contract, A, B):
+    TT_A = contract.getCommit.call(A.address, {'from': B})[3]
+    print('\n\n>>>TT_A from SMC<<<')
+    showTruthTable(TT_A)
+
+    ## 4.1: Random permutation (B)
+    TT_B = randomPermutation(TT_A)
+
+    ## 4.2: Inversion of columns
+    (b2_B, b3_B, TT_B) = inversionOfColumns(TT_B, 1, 2)
+    print('\n\n>>>FINAL TT_B<<<')
+    showTruthTable(TT_B)
+
+    print('\n\n>>>SEND TT_B TO SMART CONTRACT<<<')
+    nonce = generateNonce(b'nonceB')
+    commit = generateCommit(nonce, b2_B, b3_B)
+    contract.secondCommit(A.address, commit, TT_B, {'from': B})
+
 def main():
     TruthTable = [  [False,False,False],
                     [False,True,False],
@@ -80,19 +117,15 @@ def main():
                     [True,True,False]
     ]
 
-    # Initial truth table
-    nonce = generateNonce(b'nonce')
-    commit = generateCommit(nonce, True, False)
-    print(nonce)
-    print()
-    print('commit = {c}'.format(c = commit))
-
-    # remove
+    # Entities involved
     A = accounts[0]
     B = accounts[1]
-    CommitHandler.deploy({'from': A})
-    SMC.deploy({'from': A})
-    contract = SMC[0]
-    contract.commit(commit, TruthTable, {'from': A})
-    print('get commit = {c}'.format(c=contract.getCommit.call(A.address, {'from': A})[2]))
-    print(contract.checkCommit.call(A.address, nonce.encode(), bytes(True), bytes(False)))  
+
+    # Contract deploy
+    contract = deployContract(A)
+    
+    # Entity A
+    generate_TTA(contract, A, TruthTable)
+    
+    # Entity B
+    generate_TTB(contract, A, B)
