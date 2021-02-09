@@ -84,31 +84,33 @@ def generate_TTA(contract, A, TruthTable):
 
     ## 1.2: Inversion of columns 
     (b1_A, b3_A, TT_A) = inversionOfColumns(TT_A, 0, 2)
-    print('\n\n>>>FINAL TT_A<<<')
-    showTruthTable(TT_A)
 
     print('\n\n>>>SEND TT_A TO SMART CONTRACT<<<')
     nonce = generateNonce(b'nonceA')
     commit = generateCommit(nonce, b1_A, b3_A)
-    contract.firstCommit(commit, TT_A, {'from': A})
+    A_choice = getChoice()
+    A_rows = getRows(TT_A, b1_A, A_choice)
+    print(A_rows)
+    contract.firstCommit(commit, TT_A, A_rows, {'from': A})
+    return A_choice, b3_A
 
 def generate_TTB(contract, A, B):
     TT_A = contract.getCommit.call(A.address, {'from': B})[3]
-    print('\n\n>>>TT_A from SMC<<<')
-    showTruthTable(TT_A)
 
     ## 4.1: Random permutation (B)
     TT_B = randomPermutation(TT_A)
 
     ## 4.2: Inversion of columns
     (b2_B, b3_B, TT_B) = inversionOfColumns(TT_B, 1, 2)
-    print('\n\n>>>FINAL TT_B<<<')
-    showTruthTable(TT_B)
 
     print('\n\n>>>SEND TT_B TO SMART CONTRACT<<<')
     nonce = generateNonce(b'nonceB')
     commit = generateCommit(nonce, b2_B, b3_B)
-    contract.secondCommit(A.address, commit, TT_B, {'from': B})
+    B_choice = getChoice()
+    B_rows = getRows(TT_B, b2_B, B_choice)
+    print(B_rows)
+    contract.secondCommit(A.address, commit, TT_B, B_rows, {'from': B})
+    return B_choice, b3_B
 
 def main():
     TruthTable = [  [False,False,False],
@@ -125,7 +127,12 @@ def main():
     contract = deployContract(A)
     
     # Entity A
-    generate_TTA(contract, A, TruthTable)
+    A_choice, b3_A = generate_TTA(contract, A, TruthTable)
     
     # Entity B
-    generate_TTB(contract, A, B)
+    B_choice, b3_B = generate_TTB(contract, A, B)
+
+    # Get value
+    result = contract.getValue.call(A.address, B.address, b3_A, b3_B, {'from': A})
+    match = result == (A_choice and B_choice)
+    print("Match result : {match}".format(match=match))

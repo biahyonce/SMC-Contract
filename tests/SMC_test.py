@@ -6,7 +6,7 @@ import pytest
 import hashlib
 
 from brownie import accounts, SMC, CommitHandler
-
+#update doc with lines add
 @pytest.fixture
 def A():
     """

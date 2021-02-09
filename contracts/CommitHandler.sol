@@ -9,19 +9,21 @@ library CommitHandler {
         address owner;
         address previous; 
         bytes32 commit; 
-        bool[3][4] truthTable; 
+        bool[3][4] truthTable;
+        uint[2] lines;
     }
 
     /** 
     @notice Generate the first commit of a computation
     @param commit represents the commit informed by entity
     @param truthTable represents the truth table informed by entity
+    @param lines represents the lines choosen by the entity
     @return Commit represents the commit generated using the arguments informed
      */
-    function generate(bytes32 commit, bool[3][4] memory truthTable) public returns(Commit memory) {
+    function generate(bytes32 commit, bool[3][4] memory truthTable, uint[2] memory lines) public returns(Commit memory) {
         address owner = msg.sender;
         address previousCommitOwner = msg.sender;
-        return Commit(owner, previousCommitOwner, commit, truthTable);
+        return Commit(owner, previousCommitOwner, commit, truthTable, lines);
     }
 
     /**
@@ -29,11 +31,12 @@ library CommitHandler {
     @param previousCommitOwner represents the address of the previous commit owner 
     @param commit represents the commit informed by entity
     @param truthTable represents the truth table informed by entity
+    @param lines represents the lines choosen by the entity
     @return Commit represents the commit generated using the arguments informed
      */
-    function generate(address previousCommitOwner, bytes32 commit, bool[3][4] memory truthTable) public returns(Commit memory) {
+    function generate(address previousCommitOwner, bytes32 commit, bool[3][4] memory truthTable, uint[2] memory lines) public returns(Commit memory) {
         address owner = msg.sender;
-        return Commit(owner, previousCommitOwner, commit, truthTable);
+        return Commit(owner, previousCommitOwner, commit, truthTable, lines);
     }
 
     /**
