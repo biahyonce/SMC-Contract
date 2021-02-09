@@ -1,12 +1,13 @@
 """
-This file test the behavior of SMC contract acting as a unit test.     
+This file test the behavior of SMC contract acting as a unit test. 
+
+Author: BiancaCristina
 """
 
 import pytest 
 import hashlib
-
 from brownie import accounts, SMC, CommitHandler
-#update doc with lines add
+
 @pytest.fixture
 def A():
     """
@@ -61,6 +62,14 @@ def b3():
     return False
 
 @pytest.fixture
+def linesA():
+    return [0,1]
+
+@pytest.fixture
+def linesB():
+    return [0,2]
+
+@pytest.fixture
 def commit(nonce, b1, b3):
     """
     Return a mocked commit.
@@ -70,39 +79,39 @@ def commit(nonce, b1, b3):
     commit.update(bytes(b3))
     return "0x" + commit.hexdigest()
 
-def test_first_commit_generation(A, contract, commit, TruthTable):
+def test_first_commit_generation(A, contract, commit, linesA, TruthTable):
     """
     Test if the first commit is generated correctly.
     """
-    firstCommit = contract.firstCommit.call(commit, TruthTable, {'from': A})
+    firstCommit = contract.firstCommit.call(commit, TruthTable, linesA, {'from': A})
     assert firstCommit[0] == A.address
     assert firstCommit[1] == A.address
     assert firstCommit[2] == commit 
     assert firstCommit[3] == TruthTable
 
-def test_second_commit_generation(A, B, contract, commit, TruthTable):
+def test_second_commit_generation(A, B, contract, commit, linesA, linesB, TruthTable):
     """
     Test if the second commit is generated correctly.
     """
-    firstCommit = contract.firstCommit(commit, TruthTable, {'from': A})
-    secondCommit = contract.secondCommit.call(A.address, commit, TruthTable, {'from': B})
+    contract.firstCommit(commit, TruthTable, linesA, {'from': A})
+    secondCommit = contract.secondCommit.call(A.address, commit, TruthTable, linesB, {'from': B})
     assert secondCommit[0] == B.address
     assert secondCommit[1] == A.address
     assert secondCommit[2] == commit 
     assert secondCommit[3] == TruthTable
     
-def test_check_commit(A, contract, nonce, b1, b3, commit, TruthTable):
+def test_check_commit(A, contract, nonce, b1, b3, commit, TruthTable, linesA):
     """
     Test if a commit matches the nonce and boolean permutation.
     """
-    commitGenerated = contract.firstCommit(commit, TruthTable, {'from': A})
+    contract.firstCommit(commit, TruthTable, linesA, {'from': A})
     checkCommit = contract.checkCommit.call(A.address, nonce.encode(), bytes(b1), bytes(b3))
     assert checkCommit == True
 
-def test_get_commit(A, contract, commit, TruthTable):
+def test_get_commit(A, contract, commit, TruthTable, linesA):
     """
     Test if the commit matches the owner address.
     """
-    commitGenerated = contract.firstCommit.call(commit, TruthTable, {'from': A})
+    commitGenerated = contract.firstCommit.call(commit, TruthTable, linesA, {'from': A})
     getCommit = contract.getCommit.call(A.address)
     assert commitGenerated == getCommit

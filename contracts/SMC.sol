@@ -4,7 +4,7 @@ import {CommitHandler} from "./CommitHandler.sol";
 
 /**
 @title Contract responsible for store commits related to a truth table permutation
-@author BiancaCristina
+@author BiancaCristina, ivansendin
 @notice The current implementation only supports two entity per computation
  */
 contract SMC {
@@ -62,7 +62,6 @@ contract SMC {
         return commits[owner];
     }
 
-    // test
     /**
     @notice Get value obtained after the computation is done
     @param firstOwner represents the address of the entity that started the computation
