@@ -36,10 +36,8 @@ def encryption_of_output_column(TT: list):
 
 def generate_commit(nonce: str, inversion_bits: list, encryption_bits: list):
     commit = hashlib.new('sha256', nonce.encode())
-    for bit in inversion_bits: 
-        commit.update(bytes(bit))
-    for bit in encryption_bits: 
-        commit.update(bytes(bit))
+    commit.update(bytes(inversion_bits))
+    commit.update(bytes(encryption_bits))
     return "0x" + commit.hexdigest()
 
 def generate_nonce(random_string: str):
@@ -47,9 +45,9 @@ def generate_nonce(random_string: str):
     nonce.update(random_string)
     return nonce.hexdigest()
 
-def generate_transformed_TT(TT: list, nonceString: str):
+def generate_transformed_TT(TT: list, nonceString: str, firstColumn: int, secondColumn: int):
     TT = shuffle(TT)[0]
-    TT, inversion_bits = inversion_of_columns(TT, 0, 2)
+    TT, inversion_bits = inversion_of_columns(TT, firstColumn, secondColumn)
     TT, encryption_bits = encryption_of_output_column(TT)
     nonce = generate_nonce(nonceString)
     commit = generate_commit(nonce, inversion_bits, encryption_bits)

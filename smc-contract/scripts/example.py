@@ -3,11 +3,11 @@
 from .base_permutation_handler import *
 from brownie import *
 
-def make_commit(nonce: str, inversion_bits: list, encryption_bits: list):
-    commit = hashlib.new('sha256', nonce.encode())
-    #commit.update(bytes(inversion_bits))
-    #commit.update(bytes(encryption_bits))
-    return "0x" + commit.hexdigest()
+A = accounts[0]
+B = accounts[1]
+CommitHandler.deploy({'from': A})
+SMC.deploy({'from': A})
+contract = SMC[0]
 
 def main():
     TT = [  [False,False,False],
@@ -15,28 +15,21 @@ def main():
             [True,False,False],
             [True,True,False] ]
 
-    # 1.1: Permutar TT
-    TT_shuffled = shuffle(TT)[0]
+    # Generate TT_A
+    TT_A, commit_A, nonce_A, inversion_bits_A, encryption_bits_A = generate_transformed_TT(TT=TT, nonceString = b'nonceA', firstColumn = 0, secondColumn = 2)
+    contract.firstCommit(commit_A, TT_A, {'from': A})
 
-    # 1.2: Inversão de colunas
-    TT_inverted, inversion_bits = inversion_of_columns(TT_shuffled, 0, 2)
-
-    # 1.3: Encrypt output column
-    TT_encrypted, encryption_bits = encryption_of_output_column(TT_inverted)
-
-    # 1.4.Commit
-    nonce = generate_nonce(b'nonce')
-    commit = make_commit(nonce, inversion_bits, encryption_bits)
-    nonceSent = "0x" + nonce
-    print("nonce encoded: {ne}".format(ne=nonce.encode()))
-    print("nonce: {n}".format(n=nonceSent))
-    # Deploy
-    A = accounts[0]
-    CommitHandler.deploy({'from': A})
-    SMC.deploy({'from': A})
-    contract = SMC[0]
-    print(commit)
+    # Generate TT_B
+    TT_from_contract = contract.getCommit.call(A.address, {'from': B})[3]
+    TT_B, commit_B, nonce_B, inversion_bits_B, encryption_bits_B = generate_transformed_TT(TT=TT_from_contract, nonceString = b'nonceB', firstColumn = 1, secondColumn = 2)
+    contract.secondCommit(A.address, commit_B, TT_B, {'from': B})
     
-    contract.firstCommit(commit, TT_encrypted, {'from': A})
-    verify = contract.verify.call(A.address, nonce, bytes(inversion_bits), bytes(encryption_bits))
-    print(verify)
+    verifyA = contract.verify.call(A.address, nonce_A.encode(), bytes(inversion_bits_A), bytes(encryption_bits_A))
+    verifyB = contract.verify.call(B.address, nonce_B.encode(), bytes(inversion_bits_B), bytes(encryption_bits_B))
+    print("Commit from A is valid: {v}".format(v=verifyA))
+    print("Commit from B is valid: {v}".format(v=verifyB))
+
+    # Final computation
+    row = 1
+    result = contract.getValue.call(B.address, row, [inversion_bits_A[1], encryption_bits_A[row]], [inversion_bits_B[1], encryption_bits_B[row]])
+    print("Final result: {r}".format(r=result))

@@ -19,18 +19,9 @@ library CommitHandler {
         return Commit(owner, previousCommitOwner, commit, truthTable);
     }
 
-    /*
-    function verify(bytes32 value, bytes memory nonce, bool[2] memory inversionBits, bool[4] memory encryptionBits) public pure returns(bool) {
-        // check if abi.encode will make difference
-        bytes32 generatedValue = sha256(abi.encode(nonce,inversionBits[0], inversionBits[1], 
-                                                         encryptionBits[0], encryptionBits[1], encryptionBits[2], encryptionBits[3]));
+    function verify(bytes32 value, bytes memory nonce, bytes memory inversion_bits, bytes memory encryption_bits) public pure returns(bool) {
+        bytes32 generatedValue = sha256(abi.encodePacked(nonce, inversion_bits, encryption_bits));
         return value == generatedValue;
-    }
-    */
-
-    function verify(bytes32 value, bytes memory nonce, bytes memory inversion_bits, bytes memory encryption_bits) public pure returns(bytes32) {
-        bytes32 generatedValue = sha256(abi.encodePacked(nonce));
-        return generatedValue;
     }
 
     function isFirstCommit(Commit memory commit) public pure returns(bool) {
