@@ -53,7 +53,13 @@ run('execution-example')
 ```
 
 ## Testes
-Para rodar os testes unitário, basta:
+Para rodar todos os testes unitário, basta:
 ```bash
 brownie test --network smc
+```
+
+Para rodar os testes específicos, basta:
+```bash
+brownie test tests/CommitHandler_test.py --network smc
+brownie test tests/SMC_test.py --network smc
 ```
