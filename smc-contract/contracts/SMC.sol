@@ -7,6 +7,10 @@ import {CommitHandler} from "./CommitHandler.sol";
 /// @notice This contract can be use to store truth table commits into Ethereum
 contract SMC {
     using CommitHandler for CommitHandler.Commit;
+
+    event StartComputation(address indexed owner, bytes32 commit);
+    event FinishComputation(address indexed owner, address previousCommitOwner, bytes32 commit);
+
     mapping (address => CommitHandler.Commit) public commits;
     constructor() {}
 
@@ -17,6 +21,7 @@ contract SMC {
     function firstCommit(bytes32 commit, bool[3][4] memory truthTable) public returns (CommitHandler.Commit memory) {
         CommitHandler.Commit memory commitGenerated = CommitHandler.generate(commit, truthTable);
         commits[msg.sender] = commitGenerated;
+        emit StartComputation(msg.sender, commit);
         return commitGenerated;
     }
 
@@ -28,6 +33,7 @@ contract SMC {
     function secondCommit(address previousCommitOwner, bytes32 commit, bool[3][4] memory truthTable) public returns (CommitHandler.Commit memory) {
         CommitHandler.Commit memory commitGenerated = CommitHandler.generate(commit, previousCommitOwner, truthTable);
         commits[msg.sender] = commitGenerated;
+        emit FinishComputation(msg.sender, previousCommitOwner, commit);
         return commitGenerated;
     }
 
