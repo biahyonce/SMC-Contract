@@ -26,3 +26,9 @@ def main():
     row = 1
     result = contract.getValue.call(BOB.address, row, [inversion_bits_ALICE[1], encryption_bits_ALICE[row]], [inversion_bits_BOB[1], encryption_bits_BOB[row]])
     print("Final result: {r}".format(r=result))
+
+    # Verify 
+    verifyALICE = contract.verify.call(ALICE.address, nonce_ALICE.encode(), bytes(inversion_bits_ALICE), bytes(encryption_bits_ALICE))
+    verifyBOB = contract.verify.call(BOB.address, nonce_BOB.encode(), bytes(inversion_bits_BOB), bytes(encryption_bits_BOB))
+    print("Commit from ALICE is valid: {v}".format(v=verifyALICE))
+    print("Commit from BOB is valid: {v}".format(v=verifyBOB))
